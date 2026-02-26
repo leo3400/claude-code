@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TV/Spuling – Projektværktøj</title>
+<style>
+:root {
+  --primary: #1a56a4;
+  --primary-dark: #134191;
+  --primary-light: #e8f0fb;
+  --accent: #f0a500;
+  --success: #27ae60;
+  --warning: #e67e22;
+  --danger: #e74c3c;
+  --grey-100: #f5f7fa;
+  --grey-200: #e8ecf0;
+  --grey-300: #d1d8e0;
+  --grey-500: #8395a7;
+  --grey-700: #4a5568;
+  --grey-900: #1a202c;
+  --font: 'Segoe UI', system-ui, sans-serif;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.10);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--grey-100); color: var(--grey-900); min-height: 100vh; }
+
+/* Header */
+header {
+  background: var(--primary); color: white;
+  padding: 0 24px; display: flex; align-items: center;
+  justify-content: space-between; height: 60px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+header h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.3px; }
+header .meta { font-size: 13px; opacity: 0.85; display: flex; align-items: center; gap: 10px; }
+
+/* Nav */
+nav {
+  background: white; border-bottom: 2px solid var(--grey-200);
+  display: flex; padding: 0 24px; overflow-x: auto;
+}
+nav button {
+  padding: 14px 20px; border: none; background: none; cursor: pointer;
+  font-size: 14px; font-weight: 500; color: var(--grey-500);
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+  white-space: nowrap; transition: all 0.15s;
+}
+nav button:hover { color: var(--primary); }
+nav button.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* Main */
+main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+/* Cards */
+.card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 20px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.card-title { font-size: 16px; font-weight: 600; }
+
+/* KPI row */
+.kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.kpi { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 18px; border-left: 4px solid var(--primary); }
+.kpi.accent { border-left-color: var(--accent); }
+.kpi.success { border-left-color: var(--success); }
+.kpi.warning { border-left-color: var(--warning); }
+.kpi.danger { border-left-color: var(--danger); }
+.kpi-label { font-size: 11px; color: var(--grey-500); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.kpi-value { font-size: 22px; font-weight: 700; }
+.kpi-sub { font-size: 11px; color: var(--grey-500); margin-top: 2px; }
+
+/* Buttons */
+.btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.15s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary { background: var(--grey-200); color: var(--grey-700); }
+.btn-secondary:hover { background: var(--grey-300); }
+.btn-success { background: var(--success); color: white; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-ghost { background: rgba(255,255,255,0.18); color: white; border: 1px solid rgba(255,255,255,0.35); }
+.btn-ghost:hover { background: rgba(255,255,255,0.28); }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--grey-100); padding: 10px 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--grey-500); border-bottom: 1px solid var(--grey-200); }
+td { padding: 11px 12px; border-bottom: 1px solid var(--grey-200); vertical-align: middle; }
+tr:hover td { background: var(--grey-100); }
+tr:last-child td { border-bottom: none; }
+
+/* Forms */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 12px; font-weight: 600; color: var(--grey-700); text-transform: uppercase; letter-spacing: 0.3px; }
+.form-group input, .form-group select, .form-group textarea {
+  padding: 8px 12px; border: 1.5px solid var(--grey-300); border-radius: 6px;
+  font-size: 14px; font-family: var(--font); transition: border-color 0.15s; background: white;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,164,0.1);
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+
+/* Badges */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-aktiv { background: #d4edda; color: #155724; }
+.badge-pause { background: #fff3cd; color: #856404; }
+.badge-afleveret { background: #d1ecf1; color: #0c5460; }
+.badge-tilbud { background: #e2d9f3; color: #432874; }
+.badge-lav { background: #d4edda; color: #155724; }
+.badge-mellem { background: #fff3cd; color: #856404; }
+.badge-hoj { background: #f8d7da; color: #721c24; }
+
+/* Progress bar */
+.progress-bar { height: 6px; background: var(--grey-200); border-radius: 3px; overflow: hidden; min-width: 70px; }
+.progress-fill { height: 100%; border-radius: 3px; background: var(--primary); transition: width 0.3s; }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 12px; box-shadow: var(--shadow-lg); width: 90%; max-width: 720px; max-height: 90vh; overflow-y: auto; padding: 28px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.modal-title { font-size: 18px; font-weight: 700; }
+
+/* Tab panels */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Estimation result */
+.est-result { background: var(--primary-light); border: 1.5px solid var(--primary); border-radius: var(--radius); padding: 20px; margin-top: 20px; }
+.est-result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; }
+.est-result-item .label { font-size: 11px; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+.est-result-item .value { font-size: 26px; font-weight: 700; color: var(--primary-dark); }
+.est-result-item .unit { font-size: 12px; color: var(--grey-500); }
+
+/* Checklist */
+.checklist { list-style: none; }
+.checklist li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--grey-200); cursor: pointer; transition: background 0.1s; border-radius: 4px; padding-left: 6px; }
+.checklist li:last-child { border-bottom: none; }
+.checklist li:hover { background: var(--grey-100); }
+.checklist li.done .cl-label { text-decoration: line-through; color: var(--grey-500); }
+.checklist li.done .cl-desc { color: var(--grey-300); }
+.cl-icon { font-size: 20px; min-width: 28px; margin-top: 1px; }
+.cl-label { font-size: 14px; font-weight: 600; }
+.cl-desc { font-size: 12px; color: var(--grey-500); margin-top: 2px; }
+
+/* Scenario */
+.scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .scenario-grid { grid-template-columns: 1fr; } }
+
+/* Section divider */
+.section-divider { font-size: 11px; font-weight: 700; color: var(--grey-500); text-transform: uppercase; letter-spacing: 0.8px; margin: 20px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--grey-200); }
+
+/* DG colors */
+.dg-good { color: var(--success); font-weight: 700; }
+.dg-warn { color: var(--warning); font-weight: 700; }
+.dg-bad { color: var(--danger); font-weight: 700; }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 48px 20px; color: var(--grey-500); }
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--grey-900); color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(8px); transition: all 0.25s; z-index: 2000; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* Inline input in table */
+.inline-input { width: 65px; padding: 4px 6px; border: 1px solid var(--grey-300); border-radius: 4px; font-size: 13px; font-family: var(--font); }
+.inline-input:focus { outline: none; border-color: var(--primary); }
+
+/* Info box */
+.info-box { background: var(--primary-light); border-left: 3px solid var(--primary); border-radius: 4px; padding: 10px 14px; font-size: 13px; color: var(--grey-700); margin-bottom: 16px; }
+
+@media print {
+  header, nav, .btn, .no-print { display: none !important; }
+  .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>&#128225; TV/Spuling &ndash; Projektv&aelig;rkt&oslash;j</h1>
+  <div class="meta">
+    <span id="header-date"></span>
+    <button class="btn btn-ghost btn-sm no-print" onclick="exportData()">&#11015; Eksporter</button>
+    <label class="btn btn-ghost btn-sm no-print" style="cursor:pointer">
+      &#11014; Importer <input type="file" accept=".json" onchange="importData(event)" style="display:none">
+    </label>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('overblik',this)">&#128203; Sagsoverblik</button>
+  <button onclick="showTab('estimering',this)">&#128290; Estimering</button>
+  <button onclick="showTab('dgigv',this)">&#128176; DG / IGV</button>
+  <button onclick="showTab('tjekliste',this)">&#9989; Tjekliste</button>
+  <button onclick="showTab('scenarie',this)">&#9881;&#65039; Scenarie</button>
+</nav>
+
+<main>
+
+<!-- ======== OVERBLIK ======== -->
+<div id="tab-overblik" class="tab-panel active">
+  <div class="kpi-row" id="kpi-row"></div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Aktive sager</span>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="search-sager" placeholder="&#128269; S&oslash;g sag..." style="padding:6px 10px;border:1.5px solid var(--grey-300);border-radius:6px;font-size:13px;width:200px" oninput="renderSagTable()">
+        <button class="btn btn-primary btn-sm" onclick="openSagModal()">+ Ny sag</button>
+      </div>
+    </div>
+    <div id="sag-table-container"></div>
+  </div>
+</div>
+
+<!-- ======== ESTIMERING ======== -->
+<div id="tab-estimering" class="tab-panel">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Estimeringsv&aelig;rkt&oslash;j</span>
+      <button class="btn btn-secondary btn-sm" onclick="toggleEstSettings()">&#9881;&#65039; Juster satser</button>
+    </div>
+    <div class="info-box">Udfyld felterne nedenfor. Estimatet beregnes automatisk baseret p&aring; historiske gennemsnit (kan justeres).</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Opgavetype</label>
+        <select id="est-type" onchange="calcEst()">
+          <option value="tv">TV-inspektion</option>
+          <option value="spuling">Spuling</option>
+          <option value="begge">TV + Spuling</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Dimension (DN)</label>
+        <select id="est-dim" onchange="calcEst()">
+          <option value="150">DN 150</option>
+          <option value="200" selected>DN 200</option>
+          <option value="250">DN 250</option>
+          <option value="300">DN 300</option>
+          <option value="400">DN 400</option>
+          <option value="500">DN 500+</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Meter hovedledning (m)</label>
+        <input type="number" id="est-meter" placeholder="f.eks. 500" oninput="calcEst()">
+      </div>
+      <div class="form-group">
+        <label>Antal stik</label>
+        <input type="number" id="est-stik" placeholder="f.eks. 20" oninput="calcEst()">
+      </div>
+      <div class="form-group">
+        <label>Antal br&oslash;nde</label>
+        <input type="number" id="est-bronde" placeholder="f.eks. 8" oninput="calcEst()">
+      </div>
+      <div class="form-group">
+        <label>Antal biler tilknyttet</label>
+        <input type="number" id="est-biler" value="1" min="1" max="5" oninput="calcEst()">
+      </div>
+      <div class="form-group">
+        <label>Mobilisering tillæg (%)</label>
+        <input type="number" id="est-mob" value="10" min="0" max="50" oninput="calcEst()">
+      </div>
+      <div class="form-group">
+        <label>Produktionstimer pr. dag</label>
+        <input type="number" id="est-tpd" value="7.5" step="0.5" oninput="calcEst()">
+      </div>
+    </div>
+    <div id="est-result" class="est-result" style="display:none">
+      <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px">Estimat</div>
+      <div class="est-result-grid">
+        <div class="est-result-item"><div class="label">Timer i alt</div><div class="value" id="er-timer">—</div><div class="unit">produktionstimer</div></div>
+        <div class="est-result-item"><div class="label">Dage pr. bil</div><div class="value" id="er-dage">—</div><div class="unit">arbejdsdage</div></div>
+        <div class="est-result-item"><div class="label">Kalenderdage</div><div class="value" id="er-kdage">—</div><div class="unit">inkl. 15% buffer</div></div>
+        <div class="est-result-item"><div class="label">Salgspris</div><div class="value" id="er-pris">—</div><div class="unit">ekskl. moms</div></div>
+      </div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(26,86,164,0.2);font-size:12px;color:var(--grey-700);line-height:1.7" id="er-bd"></div>
+    </div>
+  </div>
+
+  <!-- Satser -->
+  <div id="est-settings" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">&#9881;&#65039; Historiske satser (redigérbare)</span>
+        <button class="btn btn-secondary btn-sm" onclick="toggleEstSettings()">Luk</button>
+      </div>
+      <div class="section-divider">TV-inspektion</div>
+      <div class="form-grid">
+        <div class="form-group"><label>m/time DN150-200</label><input type="number" id="s-tv-fast" oninput="saveSettings()"></div>
+        <div class="form-group"><label>m/time DN250-300</label><input type="number" id="s-tv-mid" oninput="saveSettings()"></div>
+        <div class="form-group"><label>m/time DN400+</label><input type="number" id="s-tv-slow" oninput="saveSettings()"></div>
+        <div class="form-group"><label>Min. pr. stik</label><input type="number" id="s-tv-stik" oninput="saveSettings()"></div>
+        <div class="form-group"><label>Min. pr. brønd</label><input type="number" id="s-tv-brond" oninput="saveSettings()"></div>
+        <div class="form-group"><label>Timepris TV (kr)</label><input type="number" id="s-tv-pris" oninput="saveSettings()"></div>
+      </div>
+      <div class="section-divider">Spuling</div>
+      <div class="form-grid">
+        <div class="form-group"><label>m/time DN150-200</label><input type="number" id="s-sp-fast" oninput="saveSettings()"></div>
+        <div class="form-group"><label>m/time DN250-300</label><input type="number" id="s-sp-mid" oninput="saveSettings()"></div>
+        <div class="form-group"><label>m/time DN400+</label><input type="number" id="s-sp-slow" oninput="saveSettings()"></div>
+        <div class="form-group"><label>Min. pr. stik</label><input type="number" id="s-sp-stik" oninput="saveSettings()"></div>
+        <div class="form-group"><label>Min. pr. brønd</label><input type="number" id="s-sp-brond" oninput="saveSettings()"></div>
+        <div class="form-group"><label>Timepris spuling (kr)</label><input type="number" id="s-sp-pris" oninput="saveSettings()"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== DG / IGV ======== -->
+<div id="tab-dgigv" class="tab-panel">
+  <div class="kpi-row" id="dg-kpi-row"></div>
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">DG &amp; IGV pr. sag</span>
+      <span style="font-size:12px;color:var(--grey-500)">Opdatér fremgang direkte i tabellen</span>
+    </div>
+    <div id="dg-table-container"></div>
+  </div>
+</div>
+
+<!-- ======== TJEKLISTE ======== -->
+<div id="tab-tjekliste" class="tab-panel">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Afleveringsflow</span></div>
+    <div class="form-group" style="max-width:320px">
+      <label>Vælg sag</label>
+      <select id="cl-select" onchange="renderCL()">
+        <option value="">-- Vælg sag --</option>
+      </select>
+    </div>
+  </div>
+  <div id="cl-content" style="display:none">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" id="cl-title">Afleveringsstatus</span>
+        <span id="cl-pct-text" style="font-size:13px;color:var(--grey-500)"></span>
+      </div>
+      <div class="progress-bar" style="height:8px;margin-bottom:20px"><div class="progress-fill" id="cl-pfill" style="width:0%"></div></div>
+      <ul class="checklist" id="cl-items"></ul>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px">&#128221; Noter til aflevering</div>
+      <textarea id="cl-notes" placeholder="Fritekst-noter til denne sags aflevering..." style="width:100%;padding:10px;border:1.5px solid var(--grey-300);border-radius:6px;font-family:var(--font);font-size:14px;min-height:100px;resize:vertical" oninput="saveCLNotes()"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ======== SCENARIE ======== -->
+<div id="tab-scenarie" class="tab-panel">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Kapacitetsscenarie &amp; konsekvensberegning</span></div>
+    <div class="scenario-grid">
+      <div>
+        <div class="section-divider">Normal kapacitet</div>
+        <div class="form-grid">
+          <div class="form-group"><label>TV-biler i drift</label><input type="number" id="sc-biler" value="5" min="1" max="10" oninput="calcScenario()"></div>
+          <div class="form-group"><label>Spulebiler</label><input type="number" id="sc-spulere" value="2" min="0" max="6" oninput="calcScenario()"></div>
+          <div class="form-group"><label>Produktionstimer/dag/bil</label><input type="number" id="sc-tpd" value="7.5" step="0.5" oninput="calcScenario()"></div>
+          <div class="form-group"><label>Arbejdsdage pr. uge</label><input type="number" id="sc-dage" value="5" min="1" max="7" oninput="calcScenario()"></div>
+          <div class="form-group"><label>TV: gns. m/time</label><input type="number" id="sc-tvspeed" value="60" oninput="calcScenario()"></div>
+          <div class="form-group"><label>Spuling: gns. m/time</label><input type="number" id="sc-spspeed" value="85" oninput="calcScenario()"></div>
+        </div>
+        <div class="section-divider">Hændelse / Scenario</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Biler ude (sygdom/reparation)</label><input type="number" id="sc-ude" value="0" min="0" oninput="calcScenario()"></div>
+          <div class="form-group"><label>Ekstra dage (overarbejde/wkd)</label><input type="number" id="sc-ekstra" value="0" min="0" oninput="calcScenario()"></div>
+          <div class="form-group"><label>Nattimer pr. bil pr. nat</label><input type="number" id="sc-nat" value="0" step="0.5" oninput="calcScenario()"></div>
+        </div>
+      </div>
+      <div>
+        <div class="section-divider">Ugentlig kapacitet – Normal</div>
+        <div class="kpi-row" id="sc-kpis" style="grid-template-columns:1fr 1fr"></div>
+        <div class="section-divider" style="margin-top:16px">Scenario vs. Normal</div>
+        <div id="sc-compare" class="card" style="background:var(--grey-100);box-shadow:none;border:1px solid var(--grey-200);padding:14px"></div>
+        <div class="section-divider" style="margin-top:16px">Nat vs. Dag (pr. bil)</div>
+        <div id="sc-natdag" class="card" style="background:var(--grey-100);box-shadow:none;border:1px solid var(--grey-200);padding:14px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ======== SAG MODAL ======== -->
+<div class="modal-overlay" id="sag-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Ny sag</span>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal()">&#10005; Luk</button>
+    </div>
+    <div class="section-divider">Stamdata</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Sagsnummer *</label><input id="m-nr" placeholder="f.eks. 2025-042"></div>
+      <div class="form-group"><label>Kunde / Forsyningsselskab *</label><input id="m-kunde" placeholder="f.eks. Aarhus Vand"></div>
+      <div class="form-group"><label>Beskrivelse</label><input id="m-beskr" placeholder="f.eks. Ringgadekvarteret"></div>
+      <div class="form-group"><label>Type</label>
+        <select id="m-type">
+          <option>TV-inspektion</option><option>Spuling</option><option>TV + Spuling</option><option>N&oslash;dreparation</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Status</label>
+        <select id="m-status">
+          <option>Tilbud</option><option>Aktiv</option><option>Pause</option><option>Afleveret</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Risiko</label>
+        <select id="m-risiko"><option>Lav</option><option>Mellem</option><option>H&oslash;j</option></select>
+      </div>
+      <div class="form-group"><label>Startdato</label><input type="date" id="m-start"></div>
+      <div class="form-group"><label>Slutdato (plan)</label><input type="date" id="m-slut"></div>
+    </div>
+    <div class="section-divider">&#216;konomi</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Kontraktsum / Budget (kr)</label><input type="number" id="m-budget" placeholder="0"></div>
+      <div class="form-group"><label>Faktureret til dato (kr)</label><input type="number" id="m-fak" placeholder="0"></div>
+      <div class="form-group"><label>Direkte omkostninger (kr)</label><input type="number" id="m-omk" placeholder="0"></div>
+      <div class="form-group"><label>Fremgang (%)</label><input type="number" id="m-fremgang" placeholder="0" min="0" max="100"></div>
+    </div>
+    <div class="section-divider">Milepæle &amp; noter</div>
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1"><label>N&aelig;ste milepæl</label><input id="m-mile" placeholder="f.eks. Afsendelse af DANDAS XML til kunde"></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Noter</label><textarea id="m-noter" placeholder="Fritekst..."></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap">
+      <button class="btn btn-danger btn-sm" id="del-btn" onclick="deleteSag()" style="display:none;margin-right:auto">&#128465; Slet sag</button>
+      <button class="btn btn-secondary" onclick="closeModal()">Annuller</button>
+      <button class="btn btn-primary" onclick="saveSag()">Gem sag</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ======== DATA MODEL ========
+let db = {
+  sager: [],
+  settings: {
+    tv:  { fast:70,  mid:50,  slow:35, stik:20, brond:12, pris:950 },
+    sp:  { fast:100, mid:70,  slow:50, stik:15, brond:8,  pris:850 }
+  }
+};
+
+// ======== PERSISTENCE ========
+function loadDB() {
+  const raw = localStorage.getItem('kloakdb_v3');
+  if (raw) { try { db = JSON.parse(raw); } catch(e) {} }
+  const s = db.settings;
+  sv('s-tv-fast', s.tv.fast); sv('s-tv-mid', s.tv.mid); sv('s-tv-slow', s.tv.slow);
+  sv('s-tv-stik', s.tv.stik); sv('s-tv-brond', s.tv.brond); sv('s-tv-pris', s.tv.pris);
+  sv('s-sp-fast', s.sp.fast); sv('s-sp-mid', s.sp.mid); sv('s-sp-slow', s.sp.slow);
+  sv('s-sp-stik', s.sp.stik); sv('s-sp-brond', s.sp.brond); sv('s-sp-pris', s.sp.pris);
+}
+function saveDB() { localStorage.setItem('kloakdb_v3', JSON.stringify(db)); }
+
+function saveSettings() {
+  const s = db.settings;
+  s.tv.fast  = +gv('s-tv-fast'); s.tv.mid   = +gv('s-tv-mid');  s.tv.slow  = +gv('s-tv-slow');
+  s.tv.stik  = +gv('s-tv-stik'); s.tv.brond = +gv('s-tv-brond'); s.tv.pris  = +gv('s-tv-pris');
+  s.sp.fast  = +gv('s-sp-fast'); s.sp.mid   = +gv('s-sp-mid');  s.sp.slow  = +gv('s-sp-slow');
+  s.sp.stik  = +gv('s-sp-stik'); s.sp.brond = +gv('s-sp-brond'); s.sp.pris  = +gv('s-sp-pris');
+  saveDB(); calcEst();
+}
+
+function exportData() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(db, null, 2)], {type:'application/json'}));
+  a.download = 'kloakprojekt_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); toast('Data eksporteret!');
+}
+function importData(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try { db = JSON.parse(ev.target.result); saveDB(); renderAll(); toast('Importeret: ' + db.sager.length + ' sager.'); }
+    catch(err) { toast('Fejl: ugyldig fil.'); }
+  };
+  r.readAsText(file);
+}
+
+// ======== HELPERS ========
+const gv = id => document.getElementById(id)?.value ?? '';
+const sv = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const fmtKr = n => new Intl.NumberFormat('da-DK', {style:'currency', currency:'DKK', maximumFractionDigits:0}).format(n || 0);
+const fmtPct = n => (+(n||0)).toFixed(1) + '%';
+const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+function toast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg;
+  t.classList.add('show'); clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ======== NAVIGATION ========
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'dgigv') renderDGIGV();
+  if (id === 'tjekliste') renderCLSelect();
+  if (id === 'scenarie') calcScenario();
+}
+
+// ======== OVERBLIK ========
+let editingId = null;
+
+function openSagModal(id) {
+  editingId = id || null;
+  const s = id ? db.sager.find(x => x.id === id) : null;
+  document.getElementById('modal-title').textContent = s ? 'Rediger sag' : 'Ny sag';
+  document.getElementById('del-btn').style.display = s ? 'inline-block' : 'none';
+  sv('m-nr',      s?.nr      || '');
+  sv('m-kunde',   s?.kunde   || '');
+  sv('m-beskr',   s?.beskr   || '');
+  sv('m-type',    s?.type    || 'TV-inspektion');
+  sv('m-status',  s?.status  || 'Aktiv');
+  sv('m-risiko',  s?.risiko  || 'Lav');
+  sv('m-start',   s?.start   || '');
+  sv('m-slut',    s?.slut    || '');
+  sv('m-budget',  s?.budget  || '');
+  sv('m-fak',     s?.fak     || '');
+  sv('m-omk',     s?.omk     || '');
+  sv('m-fremgang',s?.fremgang|| '');
+  sv('m-mile',    s?.mile    || '');
+  sv('m-noter',   s?.noter   || '');
+  document.getElementById('sag-modal').classList.add('open');
+}
+function closeModal() { document.getElementById('sag-modal').classList.remove('open'); }
+
+function saveSag() {
+  const nr = gv('m-nr').trim(), kunde = gv('m-kunde').trim();
+  if (!nr || !kunde) { toast('Udfyld sagsnummer og kunde.'); return; }
+  const existing = editingId ? db.sager.find(s => s.id === editingId) : null;
+  const sag = {
+    id:      editingId || uid(),
+    nr, kunde,
+    beskr:   gv('m-beskr'),
+    type:    gv('m-type'),
+    status:  gv('m-status'),
+    risiko:  gv('m-risiko'),
+    start:   gv('m-start'),
+    slut:    gv('m-slut'),
+    budget:  +gv('m-budget') || 0,
+    fak:     +gv('m-fak')    || 0,
+    omk:     +gv('m-omk')    || 0,
+    fremgang:clamp(+gv('m-fremgang')||0, 0, 100),
+    mile:    gv('m-mile'),
+    noter:   gv('m-noter'),
+    tjek:    existing?.tjek    || defaultTjek(),
+    clNoter: existing?.clNoter || ''
+  };
+  if (editingId) { db.sager = db.sager.map(s => s.id === editingId ? sag : s); toast('Sag opdateret!'); }
+  else           { db.sager.push(sag); toast('Sag oprettet!'); }
+  saveDB(); renderAll(); closeModal();
+}
+
+function deleteSag() {
+  if (!confirm('Slette denne sag permanent?')) return;
+  db.sager = db.sager.filter(s => s.id !== editingId);
+  saveDB(); renderAll(); closeModal(); toast('Sag slettet.');
+}
+
+function defaultTjek() { return { spulerapport:false, tv:false, dandas:false, tvi:false, ikas:false, validering:false }; }
+
+function renderKPIs() {
+  const all = db.sager;
+  const aktive = all.filter(s => s.status === 'Aktiv');
+  const totBudget = all.reduce((a,s) => a + (s.budget||0), 0);
+  const totFak    = aktive.reduce((a,s) => a + (s.fak||0), 0);
+  const totOmk    = aktive.reduce((a,s) => a + (s.omk||0), 0);
+  const dg        = totFak > 0 ? (totFak - totOmk) / totFak * 100 : 0;
+  const hoj       = aktive.filter(s => s.risiko === 'Høj').length;
+  document.getElementById('kpi-row').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Aktive sager</div><div class="kpi-value">${aktive.length}</div><div class="kpi-sub">af ${all.length} total</div></div>
+    <div class="kpi accent"><div class="kpi-label">Samlet kontraktsum</div><div class="kpi-value" style="font-size:18px">${fmtKr(totBudget)}</div><div class="kpi-sub">alle sager</div></div>
+    <div class="kpi success"><div class="kpi-label">Faktureret (aktive)</div><div class="kpi-value" style="font-size:18px">${fmtKr(totFak)}</div></div>
+    <div class="kpi ${dg>=30?'success':dg>=20?'warning':'danger'}"><div class="kpi-label">DG% (aktive)</div><div class="kpi-value">${fmtPct(dg)}</div><div class="kpi-sub">dækningsbidrag</div></div>
+    <div class="kpi ${hoj>0?'danger':'success'}"><div class="kpi-label">Høj risiko</div><div class="kpi-value">${hoj}</div><div class="kpi-sub">aktive sager</div></div>
+  `;
+}
+
+function sBadge(s) {
+  const m = {'Aktiv':'aktiv','Pause':'pause','Afleveret':'afleveret','Tilbud':'tilbud'};
+  return `<span class="badge badge-${m[s]||'aktiv'}">${s}</span>`;
+}
+function rBadge(r) {
+  const m = {'Lav':'lav','Mellem':'mellem','Høj':'hoj'};
+  return `<span class="badge badge-${m[r]||'lav'}">${r}</span>`;
+}
+
+function renderSagTable() {
+  const q = gv('search-sager').toLowerCase();
+  const sager = db.sager.filter(s =>
+    !q || s.nr.toLowerCase().includes(q) || s.kunde.toLowerCase().includes(q) || (s.beskr||'').toLowerCase().includes(q)
+  ).sort((a,b) => { const o={'Aktiv':0,'Pause':1,'Tilbud':2,'Afleveret':3}; return (o[a.status]||9)-(o[b.status]||9); });
+
+  const container = document.getElementById('sag-table-container');
+  if (sager.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">&#128203;</div><p>Ingen sager. Klik &quot;+ Ny sag&quot; for at komme i gang.</p></div>';
+    return;
+  }
+  container.innerHTML = `<div style="overflow-x:auto"><table>
+    <thead><tr>
+      <th>Sagsnr.</th><th>Kunde</th><th>Type</th><th>Status</th>
+      <th>Fremgang</th><th>Budget</th><th>Faktureret</th><th>DG%</th>
+      <th>N&aelig;ste milepæl</th><th>Risiko</th><th>Slutdato</th><th></th>
+    </tr></thead>
+    <tbody>${sager.map(s => {
+      const dg = s.fak > 0 ? (s.fak - (s.omk||0)) / s.fak * 100 : 0;
+      const dgCls = dg >= 30 ? 'dg-good' : dg >= 20 ? 'dg-warn' : 'dg-bad';
+      const overdue = s.slut && new Date(s.slut) < new Date() && s.status === 'Aktiv';
+      const clDone = s.tjek ? Object.values(s.tjek).filter(Boolean).length : 0;
+      return `<tr>
+        <td><strong>${s.nr}</strong></td>
+        <td>${s.kunde}<br><small style="color:var(--grey-500)">${s.beskr||''}</small></td>
+        <td style="font-size:12px;white-space:nowrap">${s.type}</td>
+        <td>${sBadge(s.status)}</td>
+        <td><div style="display:flex;align-items:center;gap:6px">
+          <div class="progress-bar"><div class="progress-fill" style="width:${s.fremgang||0}%"></div></div>
+          <span style="font-size:12px;min-width:30px">${s.fremgang||0}%</span>
+        </div></td>
+        <td style="font-size:13px">${fmtKr(s.budget)}</td>
+        <td style="font-size:13px">${fmtKr(s.fak)}</td>
+        <td class="${dgCls}">${s.fak>0 ? fmtPct(dg) : '—'}</td>
+        <td style="font-size:12px;max-width:150px">${s.mile||'—'}</td>
+        <td>${rBadge(s.risiko)}</td>
+        <td style="font-size:12px;${overdue?'color:var(--danger);font-weight:700':''}">${s.slut?s.slut.split('-').reverse().join('.'):'—'}</td>
+        <td><button class="btn btn-secondary btn-sm" onclick="openSagModal('${s.id}')">&#9998;</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+// ======== DG / IGV ========
+function renderDGIGV() {
+  const aktive = db.sager.filter(s => s.status !== 'Afleveret');
+  const totB   = aktive.reduce((a,s)=>a+(s.budget||0),0);
+  const totF   = aktive.reduce((a,s)=>a+(s.fak||0),0);
+  const totO   = aktive.reduce((a,s)=>a+(s.omk||0),0);
+  const totDG  = totF > 0 ? (totF-totO)/totF*100 : 0;
+  const totIGV = aktive.reduce((a,s)=>a+Math.max(0,(s.budget||0)*(s.fremgang||0)/100-(s.fak||0)),0);
+  const totRest= aktive.reduce((a,s)=>a+Math.max(0,(s.budget||0)-(s.fak||0)),0);
+
+  document.getElementById('dg-kpi-row').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Kontraktsum (aktive)</div><div class="kpi-value" style="font-size:18px">${fmtKr(totB)}</div></div>
+    <div class="kpi success"><div class="kpi-label">Faktureret</div><div class="kpi-value" style="font-size:18px">${fmtKr(totF)}</div></div>
+    <div class="kpi warning"><div class="kpi-label">Direkte omk.</div><div class="kpi-value" style="font-size:18px">${fmtKr(totO)}</div></div>
+    <div class="kpi ${totDG>=30?'success':totDG>=20?'warning':'danger'}"><div class="kpi-label">DG% samlet</div><div class="kpi-value">${fmtPct(totDG)}</div></div>
+    <div class="kpi accent"><div class="kpi-label">IGV (optjent)</div><div class="kpi-value" style="font-size:18px">${fmtKr(totIGV)}</div><div class="kpi-sub">ikke-faktureret</div></div>
+    <div class="kpi"><div class="kpi-label">Restfaktura</div><div class="kpi-value" style="font-size:18px">${fmtKr(totRest)}</div><div class="kpi-sub">tilbageværende</div></div>
+  `;
+
+  const c = document.getElementById('dg-table-container');
+  if (aktive.length === 0) { c.innerHTML = '<div class="empty-state"><div class="icon">&#128176;</div><p>Ingen aktive sager.</p></div>'; return; }
+
+  c.innerHTML = `<div style="overflow-x:auto"><table>
+    <thead><tr>
+      <th>Sag</th><th>Kunde</th><th>Kontraktsum</th><th>Fremgang%</th>
+      <th>Faktureret</th><th>Direkte omk.</th><th>DG kr</th><th>DG%</th><th>IGV</th><th>Restfaktura</th>
+    </tr></thead>
+    <tbody>${aktive.map(s => {
+      const dg    = s.fak - (s.omk||0);
+      const dgPct = s.fak > 0 ? dg/s.fak*100 : 0;
+      const igv   = Math.max(0, (s.budget||0)*(s.fremgang||0)/100 - (s.fak||0));
+      const rest  = Math.max(0, (s.budget||0) - (s.fak||0));
+      const cls   = dgPct>=30?'dg-good':dgPct>=20?'dg-warn':'dg-bad';
+      return `<tr>
+        <td><strong>${s.nr}</strong></td>
+        <td>${s.kunde}</td>
+        <td>${fmtKr(s.budget)}</td>
+        <td><input type="number" class="inline-input" value="${s.fremgang||0}" min="0" max="100" onchange="updFremgang('${s.id}',this.value)">%</td>
+        <td>${fmtKr(s.fak)}</td>
+        <td>${fmtKr(s.omk)}</td>
+        <td class="${cls}">${fmtKr(dg)}</td>
+        <td class="${cls}">${s.fak>0?fmtPct(dgPct):'—'}</td>
+        <td style="color:var(--warning);font-weight:600">${fmtKr(igv)}</td>
+        <td style="color:var(--primary);font-weight:600">${fmtKr(rest)}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+function updFremgang(id, val) {
+  const s = db.sager.find(x=>x.id===id);
+  if (s) { s.fremgang = clamp(+val||0, 0, 100); saveDB(); renderDGIGV(); }
+}
+
+// ======== ESTIMERING ========
+function toggleEstSettings() {
+  const el = document.getElementById('est-settings');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function calcEst() {
+  const meter  = +gv('est-meter')  || 0;
+  const stik   = +gv('est-stik')   || 0;
+  const bronde = +gv('est-bronde') || 0;
+  const biler  = Math.max(1, +gv('est-biler')  || 1);
+  const tpd    = +gv('est-tpd')    || 7.5;
+  const mob    = +gv('est-mob')    || 0;
+  const dim    = +gv('est-dim')    || 200;
+  const type   = gv('est-type');
+
+  if (!meter && !stik && !bronde) { document.getElementById('est-result').style.display='none'; return; }
+
+  const s = db.settings;
+  const spd = cfg => dim <= 200 ? cfg.fast : dim <= 300 ? cfg.mid : cfg.slow;
+
+  let tvH=0, spH=0, lines=[];
+
+  if (type==='tv' || type==='begge') {
+    const mH = meter / spd(s.tv);
+    const sH = stik   * s.tv.stik  / 60;
+    const bH = bronde * s.tv.brond / 60;
+    tvH = mH + sH + bH;
+    lines.push(`TV: ${meter}m ÷ ${spd(s.tv)} m/t = ${mH.toFixed(1)}t &nbsp;|&nbsp; ${stik} stik × ${s.tv.stik} min &nbsp;|&nbsp; ${bronde} br&oslash;nde × ${s.tv.brond} min`);
+  }
+  if (type==='spuling' || type==='begge') {
+    const mH = meter / spd(s.sp);
+    const sH = stik   * s.sp.stik  / 60;
+    const bH = bronde * s.sp.brond / 60;
+    spH = mH + sH + bH;
+    lines.push(`Spuling: ${meter}m ÷ ${spd(s.sp)} m/t = ${mH.toFixed(1)}t &nbsp;|&nbsp; ${stik} stik × ${s.sp.stik} min &nbsp;|&nbsp; ${bronde} br&oslash;nde × ${s.sp.brond} min`);
+  }
+
+  const totH    = (tvH + spH) * (1 + mob/100);
+  const dageB   = totH / tpd;
+  const dageBil = dageB / biler;
+  const kDage   = Math.ceil(dageBil * 1.15);
+  const pris    = (tvH * s.tv.pris + spH * s.sp.pris) * (1 + mob/100);
+
+  document.getElementById('er-timer').textContent = totH.toFixed(1);
+  document.getElementById('er-dage').textContent  = dageBil.toFixed(1);
+  document.getElementById('er-kdage').textContent = kDage;
+  document.getElementById('er-pris').textContent  = fmtKr(pris);
+  document.getElementById('er-bd').innerHTML      = lines.join('<br>') +
+    `<br><em>+ ${mob}% mobiliseringstillæg &nbsp;|&nbsp; 15% tidsbuffer &nbsp;|&nbsp; ${biler} bil(er)</em>`;
+  document.getElementById('est-result').style.display = 'block';
+}
+
+// ======== TJEKLISTE ========
+const CL_STEPS = [
+  { key:'spulerapport', icon:'🚿', label:'Spulerapport',         desc:'Spulerapport udarbejdet og QA-godkendt' },
+  { key:'tv',           icon:'📹', label:'TV-inspektion',        desc:'TV-inspektion gennemført og rådata kontrolleret' },
+  { key:'dandas',       icon:'📄', label:'DANDAS XML',           desc:'DANDAS XML-fil genereret og valideret' },
+  { key:'tvi',          icon:'🖥️', label:'TVI-registrering',     desc:'Registrering i TVI-systemet fuldført' },
+  { key:'ikas',         icon:'✔️', label:'IKAS godkendelse',     desc:'Kvalitetssikring gennemgået i IKAS' },
+  { key:'validering',   icon:'🤝', label:'Kundevalidering',      desc:'Dokumentation afsendt og godkendt af kunde' },
+];
+
+function renderCLSelect() {
+  const sel = document.getElementById('cl-select');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">-- Vælg sag --</option>' +
+    db.sager.filter(s => s.status==='Aktiv' || s.status==='Pause')
+      .map(s => `<option value="${s.id}" ${s.id===cur?'selected':''}>${s.nr} – ${s.kunde}</option>`).join('');
+  if (cur) renderCL();
+}
+
+function renderCL() {
+  const id  = gv('cl-select');
+  const box = document.getElementById('cl-content');
+  if (!id) { box.style.display='none'; return; }
+  const sag = db.sager.find(s=>s.id===id);
+  if (!sag) { box.style.display='none'; return; }
+  box.style.display = 'block';
+  document.getElementById('cl-title').textContent = `${sag.nr} – ${sag.kunde}`;
+  document.getElementById('cl-notes').value = sag.clNoter || '';
+
+  const tjek = sag.tjek || defaultTjek();
+  const done = CL_STEPS.filter(st=>tjek[st.key]).length;
+  document.getElementById('cl-pct-text').textContent = `${done} / ${CL_STEPS.length} trin gennemf&oslash;rt`;
+  document.getElementById('cl-pfill').style.width = (done/CL_STEPS.length*100) + '%';
+
+  document.getElementById('cl-items').innerHTML = CL_STEPS.map(st => `
+    <li class="${tjek[st.key]?'done':''}" onclick="toggleTjek('${id}','${st.key}')">
+      <span class="cl-icon">${tjek[st.key]?'✅':st.icon}</span>
+      <div><div class="cl-label">${st.label}</div><div class="cl-desc">${st.desc}</div></div>
+    </li>
+  `).join('');
+}
+
+function toggleTjek(sagId, key) {
+  const s = db.sager.find(x=>x.id===sagId); if(!s) return;
+  if (!s.tjek) s.tjek = defaultTjek();
+  s.tjek[key] = !s.tjek[key];
+  saveDB(); renderCL();
+}
+function saveCLNotes() {
+  const s = db.sager.find(x=>x.id===gv('cl-select')); if(s) { s.clNoter=gv('cl-notes'); saveDB(); }
+}
+
+// ======== SCENARIE ========
+function calcScenario() {
+  const biler   = +gv('sc-biler')   || 5;
+  const spulere = +gv('sc-spulere') || 2;
+  const tpd     = +gv('sc-tpd')     || 7.5;
+  const dage    = +gv('sc-dage')    || 5;
+  const tvSpd   = +gv('sc-tvspeed') || 60;
+  const spSpd   = +gv('sc-spspeed') || 85;
+  const ude     = +gv('sc-ude')     || 0;
+  const ekstra  = +gv('sc-ekstra')  || 0;
+  const nat     = +gv('sc-nat')     || 0;
+
+  const effBiler  = Math.max(0, biler - ude);
+  const effDage   = dage + ekstra;
+
+  const nTVt = biler  * tpd * dage;
+  const nSPt = spulere * tpd * dage;
+  const sTVt = effBiler * (tpd + nat) * effDage;
+  const sSPt = Math.max(0, spulere - Math.max(0, ude - biler)) * tpd * effDage;
+
+  document.getElementById('sc-kpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">TV-timer/uge</div><div class="kpi-value">${nTVt.toFixed(0)}</div><div class="kpi-sub">${(nTVt*tvSpd/1000).toFixed(1)} km/uge</div></div>
+    <div class="kpi success"><div class="kpi-label">Spuletimer/uge</div><div class="kpi-value">${nSPt.toFixed(0)}</div><div class="kpi-sub">${(nSPt*spSpd/1000).toFixed(1)} km/uge</div></div>
+  `;
+
+  const diff = (a,b) => { const d=a-b; return `<span style="color:${d<0?'var(--danger)':d>0?'var(--success)':'inherit'}">${d>0?'+':''}${d.toFixed(0)}</span>`; };
+  document.getElementById('sc-compare').innerHTML = `<table style="width:100%;font-size:13px">
+    <tr><th style="background:none;padding:5px 0">Ressource</th><th style="background:none;padding:5px 0">Normal</th><th style="background:none;padding:5px 0">Scenario</th><th style="background:none;padding:5px 0">Delta</th></tr>
+    <tr><td>TV-biler aktive</td><td>${biler}</td><td>${effBiler}</td><td>${diff(effBiler,biler)}</td></tr>
+    <tr><td>TV-timer/uge</td><td>${nTVt.toFixed(0)}</td><td>${sTVt.toFixed(0)}</td><td>${diff(sTVt,nTVt)}</td></tr>
+    <tr><td>TV-meter/uge</td><td>${(nTVt*tvSpd).toFixed(0)} m</td><td>${(sTVt*tvSpd).toFixed(0)} m</td><td>${diff(sTVt*tvSpd,nTVt*tvSpd)}</td></tr>
+    <tr><td>Spuletimer/uge</td><td>${nSPt.toFixed(0)}</td><td>${sSPt.toFixed(0)}</td><td>${diff(sSPt,nSPt)}</td></tr>
+    <tr><td>Spule-meter/uge</td><td>${(nSPt*spSpd).toFixed(0)} m</td><td>${(sSPt*spSpd).toFixed(0)} m</td><td>${diff(sSPt*spSpd,nSPt*spSpd)}</td></tr>
+  </table>`;
+
+  document.getElementById('sc-natdag').innerHTML = `<table style="width:100%;font-size:13px">
+    <tr><th style="background:none;padding:5px 0">Konfiguration</th><th style="background:none;padding:5px 0">Timer/uge pr. bil</th><th style="background:none;padding:5px 0">Meter/uge pr. bil</th></tr>
+    <tr><td>Kun dag (${tpd}t)</td><td>${(tpd*dage).toFixed(1)}</td><td>${(tpd*dage*tvSpd).toFixed(0)} m</td></tr>
+    <tr><td>Kun nat (${nat}t/nat)</td><td>${(nat*dage).toFixed(1)}</td><td>${(nat*dage*tvSpd).toFixed(0)} m</td></tr>
+    <tr><td><strong>Dag + nat kombineret</strong></td><td><strong>${((tpd+nat)*dage).toFixed(1)}</strong></td><td><strong>${((tpd+nat)*dage*tvSpd).toFixed(0)} m</strong></td></tr>
+  </table>`;
+}
+
+// ======== INIT ========
+function renderAll() { renderKPIs(); renderSagTable(); }
+
+document.getElementById('header-date').textContent =
+  new Date().toLocaleDateString('da-DK', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+loadDB();
+renderAll();
+calcScenario();
+
+// Close modal on overlay click
+document.getElementById('sag-modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+</script>
+</body>
+</html>
